@@ -151,6 +151,13 @@ MonoBehaviour:
   carRigidbody: {fileID: 1237220853}
   playerCar: {fileID: 1237220851}
   aiDisplay: {fileID: 0}
+  trials:
+  - aiMessage: 'TRIAL 1: DRIVE STRAIGHT'
+    shouldGoLeft: 0
+    aiIsLying: 0
+  - aiMessage: 'TRIAL 2: DRIVE STRAIGHT'
+    shouldGoLeft: 0
+    aiIsLying: 0
   resetZ: 300
   downForce: 50000
 --- !u!4 &252712032
