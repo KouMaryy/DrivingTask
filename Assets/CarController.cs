@@ -7,7 +7,7 @@ public class CarController : MonoBehaviour
 
     // Settings that can be changed from the Unity Inspector
     public float forwardSpeed = 15f; // Car Speed
-    public float laneDistance = 3.0f; // Distance between lanes
+    public float laneDistance = 6.0f; // Distance between lanes
     public float sideSpeed = 10f; //Car Speed of lane change
 
     [Header("Steering Wheel Settings")]
@@ -15,7 +15,7 @@ public class CarController : MonoBehaviour
     public float maxSteerAngle = 45f; // Maximum angle the steering wheel can rotate
     public float wheelRotationSpeed = 5f; // Speed at which the steering wheel rotates
 
-    private int targetLane = 0; // 0: Left, 1: Right
+    private int targetLane = -1; // -1: Left, 1: Right
     private float currentSteerAngle = 0f; // Current angle of the steering wheel
 
     // This function is automatically called from Player Input component
@@ -30,7 +30,7 @@ public class CarController : MonoBehaviour
         if (input.x > 0) targetLane = 1;
 
         // left (A or left arrow)
-        if (input.x < 0) targetLane = 0;
+        if (input.x < 0) targetLane = -1;
     }
 
     void Update()
@@ -59,10 +59,11 @@ public class CarController : MonoBehaviour
         // We find the distance between where the car is (transform.position.x) 
         // and where it wants to go (targetLane * laneDistance).
         float distanceToTarget = (targetLane * laneDistance) - transform.position.x;
+        float normalizedDistance = distanceToTarget / laneDistance; // Normalize to range [-1, 1]
 
         // The target angle now depends on this distance. 
         // As distance goes to 0 (car reaches lane), targetAngle goes to 0 (wheel straightens).
-        float targetAngle = distanceToTarget * maxSteerAngle;
+        float targetAngle = normalizedDistance * maxSteerAngle;
 
         // Clamp the angle so it doesn't exceed the max degrees we set
         targetAngle = Mathf.Clamp(targetAngle, -maxSteerAngle, maxSteerAngle);
