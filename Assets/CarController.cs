@@ -6,6 +6,7 @@ public class CarController : MonoBehaviour
     [Header("Movement Settings")]
 
     // Settings that can be changed from the Unity Inspector
+    public bool canMove = true; // Flag to enable/disable car movement
     public float forwardSpeed = 15f; // Car Speed
     public float laneDistance = 6.0f; // Distance between lanes
     public float sideSpeed = 10f; //Car Speed of lane change
@@ -35,6 +36,8 @@ public class CarController : MonoBehaviour
 
     void Update()
     {
+        if (!canMove) return; // If movement is disabled, exit the function
+        
         // 1. Car always moves forward
         transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime);
 
