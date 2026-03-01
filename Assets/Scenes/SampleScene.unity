@@ -148,18 +148,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdac8135690ea4a01adb344795415199, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrialManager
+  carController: {fileID: 1237220847}
   carRigidbody: {fileID: 1237220853}
   playerCar: {fileID: 1237220851}
   aiDisplay: {fileID: 752542068}
   trials:
-  - aiMessage: 'TRIAL 1: DRIVE STRAIGHT'
+  - aiMessage: TRIAL 1 :\n DANGER to the LEFT
     shouldGoLeft: 0
     aiIsLying: 0
-  - aiMessage: 'TRIAL 2: DRIVE STRAIGHT'
+  - aiMessage: TRIAL 2 :\n DANGER to the RIGHT
     shouldGoLeft: 0
     aiIsLying: 0
-  resetZ: 300
+  resetZ: 320
   downForce: 50000
+  triggerZ: 260
+  displayDistance: 150
 --- !u!4 &252712032
 Transform:
   m_ObjectHideFlags: 0
@@ -726,7 +729,7 @@ Transform:
   m_GameObject: {fileID: 609040570}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6, y: 5.5, z: 200}
+  m_LocalPosition: {x: -6, y: 7.5, z: 260}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -952,6 +955,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc2df7febc5354ff18f21f098e35fc91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
+  canMove: 1
   forwardSpeed: 23
   laneDistance: 6
   sideSpeed: 10
@@ -1394,7 +1398,7 @@ Transform:
   m_GameObject: {fileID: 1974158347}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6, y: 5.5, z: 200}
+  m_LocalPosition: {x: 6, y: 7.5, z: 260}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
