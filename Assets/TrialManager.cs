@@ -47,32 +47,30 @@ public class TrialManager : MonoBehaviour
 
    void PerformReset()
 {
-    // 1. ΠΑΝΤΑ τηλεμεταφορά στην αφετηρία
-    // Χρησιμοποιούμε 0.5f για να πατάει σωστά στην άσφαλτο
+    // Reset the car's position to the starting point for the next trial
     playerCar.position = new Vector3(playerCar.position.x, 0.5f, 0f);
     
-    // 2. Μηδενισμός κάθε κίνησης
+    // Stop any existing movement
     carRigidbody.linearVelocity = Vector3.zero;
     carRigidbody.angularVelocity = Vector3.zero;
 
-    // 3. Αύξηση του δείκτη γύρων
+    // Move to the next trial
     currentTrialIndex++;
 
-    // 4. ΕΛΕΓΧΟΣ ΤΕΡΜΑΤΙΣΜΟΥ
+     // If we've reached the end of the trials list, we can choose to loop back to the first trial or simply stop updating.
     if (currentTrialIndex >= trials.Count)
     {
         if (aiDisplay != null) aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
         Debug.Log("Experiment Finished. Car Locked.");
 
-        // ΤΟ ΚΛΕΙΔΙ: Κάνουμε το αμάξι Kinematic για να ΜΗΝ κουνιέται καθόλου
+        // Kinematic mode keeps the car stationary and unaffected by physics
         carRigidbody.isKinematic = true; 
 
-        // Απενεργοποιούμε το script
+        // Disable this script to prevent further updates
         this.enabled = false;
         return; 
     }
-
-    // 5. Ενημέρωση για τον επόμενο γύρο
+    // Update for the next trial
     UpdateTrial();
 }
 
