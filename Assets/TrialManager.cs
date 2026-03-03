@@ -8,6 +8,8 @@ public class TrialData
     public string aiMessage;      //  Text that the AI will display to the driver
     public bool shouldGoLeft;    // Correct direction for the driver to take (true for left, false for right)
     public bool aiIsLying;       // AI's honesty status for this trial (true if the AI is lying, false if it's telling the truth)
+    [Range(0, 1)]
+    public float weatherIntensity; // 0 = Clear, 1 = Heavy (used to control the intensity of weather effects in the trial)
 }
 
 public class TrialManager : MonoBehaviour
@@ -29,9 +31,29 @@ public class TrialManager : MonoBehaviour
 
     private int currentTrialIndex = 0; // Index to keep track of the current trial
 
+    [Header("Weather Settings")]
+    public GameObject weatherObject;
+    private ParticleSystem snowParticles;
+
     void Start()
     {
-        UpdateTrial(); // Initialize the first trial
+        if (weatherObject != null)
+        {
+            // Get the component even if the object is inactive
+            snowParticles = weatherObject.GetComponentInChildren<ParticleSystem>();
+            // Ensure the weather object is inactive at the start of the experiment
+            if (snowParticles != null)
+            {
+                snowParticles.Stop();
+                snowParticles.Clear();
+            }
+        }
+        //Ensure that the scene starts with clear weather
+        RenderSettings.fog = false;
+        RenderSettings.fogDensity = 0;
+
+        // Initialize the first trial 
+        UpdateTrial();
     }
     void FixedUpdate()
     {
@@ -115,12 +137,43 @@ public class TrialManager : MonoBehaviour
         // Update for the next trial
         UpdateTrial();
     }
-
     void UpdateTrial()
     {
-        if (aiDisplay != null)
+        if (aiDisplay != null && currentTrialIndex < trials.Count)
         {
-            aiDisplay.text = "SAFE"; // Reset the AI display to a default message for the next trial
+            TrialData currentTrial = trials[currentTrialIndex];
+            float intensity = currentTrial.weatherIntensity;
+
+            // Fog settings based on the trial's weather intensity
+            RenderSettings.fog = (intensity > 0);
+            RenderSettings.fogDensity = intensity * 0.02f;
+
+            // Snow particle settings based on the trial's weather intensity
+            if (weatherObject != null && snowParticles != null)
+            {
+                if (intensity > 0)
+                {
+                    // Activate the weather object and set the particle emission rate based on intensity
+                    Debug.Log("Trial " + currentTrialIndex + ": Weather starting now.");
+                    weatherObject.SetActive(true);
+                    if (!snowParticles.isPlaying) snowParticles.Play();
+
+                    var emission = snowParticles.emission;
+                    emission.rateOverTime = intensity * 2000f;
+                }
+                else
+                {
+                    Debug.Log("Trial " + currentTrialIndex + ": Weather clearing now.");
+                    // Clear the weather object when intensity is 0
+                    snowParticles.Stop();
+                    snowParticles.Clear();
+                    weatherObject.SetActive(false);
+                }
+            }
+
+
+            // Reset the AI display to a default message for the next trial
+            aiDisplay.text = "SAFE";
 
             // Reset flags for the new trial
             messageDisplayed = false;
