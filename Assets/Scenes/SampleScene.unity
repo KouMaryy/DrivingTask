@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.012
@@ -156,13 +156,24 @@ MonoBehaviour:
   - aiMessage: TRIAL 1 :\n DANGER to the LEFT
     shouldGoLeft: 0
     aiIsLying: 0
+    weatherIntensity: 0
   - aiMessage: TRIAL 2 :\n DANGER to the RIGHT
+    shouldGoLeft: 1
+    aiIsLying: 0
+    weatherIntensity: 1
+  - aiMessage: TRIAL 3 :\n DANGER to the RIGHT
+    shouldGoLeft: 1
+    aiIsLying: 0
+    weatherIntensity: 0.5
+  - aiMessage: TRIAL 4 :\n DANGER to the LEFT
     shouldGoLeft: 0
     aiIsLying: 0
+    weatherIntensity: 0
   resetZ: 320
   downForce: 50000
   triggerZ: 260
   displayDistance: 150
+  weatherObject: {fileID: 632111266}
 --- !u!4 &252712032
 Transform:
   m_ObjectHideFlags: 0
@@ -896,7 +907,7 @@ ParticleSystem:
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
   looping: 1
-  prewarm: 1
+  prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
@@ -5830,6 +5841,7 @@ MonoBehaviour:
   steeringWheel: {fileID: 2545001395375947676}
   maxSteerAngle: 45
   wheelRotationSpeed: 5
+  didPlayerIntervene: 0
 --- !u!65 &1237220848
 BoxCollider:
   m_ObjectHideFlags: 0

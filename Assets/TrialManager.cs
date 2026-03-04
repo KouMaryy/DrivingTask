@@ -87,9 +87,39 @@ public class TrialManager : MonoBehaviour
     {
         if (aiDisplay != null && currentTrialIndex < trials.Count)
         {
+            TrialData currentTrial = trials[currentTrialIndex];
             aiDisplay.text = trials[currentTrialIndex].aiMessage;
+
+            // calculate the lane suggestion based on the current trial's shouldGoLeft value and the AI's honesty status
+            // If shouldGoLeft is true, aiSuggestedLane = -1, otherwise aiSuggestedLane = 1
+            int aiSuggestedLane = currentTrial.shouldGoLeft ? -1 : 1;
+            if (currentTrial.aiIsLying)
+            {
+                aiSuggestedLane *= -1; // If the AI is lying, we invert the suggested lane.
+            }
+
+            // Find the current lane of the car based on its x position
+            int currentLane;
+            if (playerCar.position.x < -2f) currentLane = -1; // Left
+            else currentLane = 1; // Right
+
+            if (currentLane == aiSuggestedLane)
+            {
+                // car is already in the AI suggested lane, no need to change lanes
+                aiDisplay.text = "SAFE LANE MAINTAINED";
+                aiDisplay.color = Color.cyan; // Change text color to cyan for a positive message
+                Debug.Log("AI: Car already in suggested lane. No steering needed.");
+            }
+            else
+            {
+                // car is not in the AI suggested lane, so we will command it to change lanes
+                aiDisplay.text = "DANGER DETECTED\nSWITCHING LANE NOW";
+                aiDisplay.color = new Color(1f, 0.5f, 0f); // Change text color to orange for ΑΙ activeintervention
+                carController.SetTargetLane(aiSuggestedLane);
+                Debug.Log("AI Intervention: Switching to Lane " + aiSuggestedLane);
+            }
+
             messageDisplayed = true;
-            Debug.Log("AI Message Displayed!");
         }
     }
 
@@ -98,6 +128,7 @@ public class TrialManager : MonoBehaviour
         if (aiDisplay != null)
         {
             aiDisplay.text = "Consequences";
+            aiDisplay.color = Color.white;
             obstaclePassed = true;
             Debug.Log("Car passed the obstacle point.");
         }
@@ -105,6 +136,16 @@ public class TrialManager : MonoBehaviour
 
     void PerformReset()
     {
+        TrialData currentTrial = trials[currentTrialIndex];
+        bool intervened = carController.didPlayerIntervene; // Check if the player intervened during the trial
+        Debug.Log("Trial " + currentTrialIndex + " Did Player Intervene ? " + intervened);
+
+        // Here we will add the code that will write to the .csv file
+        // Example: SaveToCSV(currentTrialIndex, intervened, trials[currentTrialIndex].aiIsLying);
+
+        // Reset the intervention flag for the next trial
+        carController.ResetIntervention();
+
         // Reset the car's position to the starting point for the next trial
         playerCar.position = new Vector3(playerCar.position.x, -1.65f, 0f);
 
@@ -174,6 +215,7 @@ public class TrialManager : MonoBehaviour
 
             // Reset the AI display to a default message for the next trial
             aiDisplay.text = "SAFE";
+            aiDisplay.color = Color.white;
 
             // Reset flags for the new trial
             messageDisplayed = false;

@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
 
 public class CarController : MonoBehaviour
 {
@@ -19,6 +19,9 @@ public class CarController : MonoBehaviour
     private int targetLane = -1; // -1: Left, 1: Right
     private float currentSteerAngle = 0f; // Current angle of the steering wheel
 
+    [HideInInspector]
+    public bool didPlayerIntervene = false; // Flag to track if the player has taken control during the trial
+
     // This function is automatically called from Player Input component
     public void OnMove(InputValue value)
     {
@@ -27,17 +30,28 @@ public class CarController : MonoBehaviour
         // If you press 'A' (or left arrow), input.x becomes negative (<0).
         Vector2 input = value.Get<Vector2>();
 
-        // right (D or right arrow)
-        if (input.x > 0) targetLane = 1;
+        if (input.x != 0)
+        {
+            // left lane = -1, right lane = 1
+            targetLane = (input.x > 0) ? 1 : -1;
 
-        // left (A or left arrow)
-        if (input.x < 0) targetLane = -1;
+            // Set the flag to indicate that the player has intervened
+            didPlayerIntervene = true;
+
+            // Change color to white to show that the player has taken control
+            TrialManager manager = GameObject.FindFirstObjectByType<TrialManager>();
+            if (manager != null)
+            {
+                manager.aiDisplay.text = "MANUAL OVERRIDE";
+                manager.aiDisplay.color = Color.white;
+            }
+        }
     }
 
     void Update()
     {
         if (!canMove) return; // If movement is disabled, exit the function
-        
+
         // 1. Car always moves forward
         transform.Translate(Vector3.forward * forwardSpeed * Time.deltaTime);
 
@@ -73,8 +87,19 @@ public class CarController : MonoBehaviour
 
         // Smoothly transition the current angle to the target dynamic angle
         currentSteerAngle = Mathf.Lerp(currentSteerAngle, targetAngle, Time.deltaTime * wheelRotationSpeed);
-        
+
         // Rotate the steering wheel around the Z-axis based on the current steer angle
         steeringWheel.localRotation = Quaternion.Euler(0, 0, -currentSteerAngle);
+    }
+
+    public void SetTargetLane(int lane)
+    {
+        // lane: -1 left, 1 right
+        targetLane = lane;
+    }
+
+    public void ResetIntervention()
+    {
+        didPlayerIntervene = false;
     }
 }
