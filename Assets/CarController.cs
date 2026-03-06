@@ -40,7 +40,7 @@ public class CarController : MonoBehaviour
 
             // Change color to white to show that the player has taken control
             TrialManager manager = GameObject.FindFirstObjectByType<TrialManager>();
-            if (manager != null)
+            if (manager != null && manager.IsAIPresentlyActive())
             {
                 manager.aiDisplay.text = "MANUAL OVERRIDE";
                 manager.aiDisplay.color = Color.white;

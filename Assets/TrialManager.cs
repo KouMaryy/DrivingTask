@@ -28,12 +28,20 @@ public class TrialManager : MonoBehaviour
     public float displayDistance = 150f; // distance at which the AI message will be displayed to the driver
     private bool messageDisplayed = false; // flag to ensure the AI message is displayed only once per trial
     private bool obstaclePassed = false; // flag to track if the car has passed the obstacle for the current trial
-
     private int currentTrialIndex = 0; // Index to keep track of the current trial
 
     [Header("Weather Settings")]
     public GameObject weatherObject;
     private ParticleSystem snowParticles;
+
+    [Header("Data Logging")]
+    public string participantID = "P01"; // Unique identifier for the participant, should be set from the Unity Inspector before each participant starts the experiment
+
+    // Data for CSV : Variables for reaction time measurement and player intervention tracking
+    private float messageStartTime;
+    private float firstInterventionTime;
+    private bool reactionRecorded = false;
+    private string currentAiAction = "Maintain";
 
     void Start()
     {
@@ -76,7 +84,14 @@ public class TrialManager : MonoBehaviour
             ShowAiMessage();
         }
 
-        //
+        //Reaction Recording: If the AI has displayed a message and the player has intervened for the first time
+        if (messageDisplayed && !obstaclePassed && !reactionRecorded && carController.didPlayerIntervene)
+        {
+            firstInterventionTime = Time.time;
+            reactionRecorded = true;
+            Debug.Log("Reaction Recorded: " + (firstInterventionTime - messageStartTime) + "s");
+        }
+
         if (!obstaclePassed && playerCar.position.z >= triggerZ)
         {
             ShowPostObstacleMessage();
@@ -88,7 +103,11 @@ public class TrialManager : MonoBehaviour
         if (aiDisplay != null && currentTrialIndex < trials.Count)
         {
             TrialData currentTrial = trials[currentTrialIndex];
-            aiDisplay.text = trials[currentTrialIndex].aiMessage;
+
+            // Start measuring reaction time from the moment the AI message is displayed
+            messageStartTime = Time.time;
+            reactionRecorded = false;
+            carController.ResetIntervention(); // Reset the intervention flag at the start of the trial
 
             // calculate the lane suggestion based on the current trial's shouldGoLeft value and the AI's honesty status
             // If shouldGoLeft is true, aiSuggestedLane = -1, otherwise aiSuggestedLane = 1
@@ -107,6 +126,7 @@ public class TrialManager : MonoBehaviour
             {
                 // car is already in the AI suggested lane, no need to change lanes
                 aiDisplay.text = "SAFE LANE MAINTAINED";
+                currentAiAction = "Maintain";
                 aiDisplay.color = Color.cyan; // Change text color to cyan for a positive message
                 Debug.Log("AI: Car already in suggested lane. No steering needed.");
             }
@@ -114,6 +134,7 @@ public class TrialManager : MonoBehaviour
             {
                 // car is not in the AI suggested lane, so we will command it to change lanes
                 aiDisplay.text = "DANGER DETECTED\nSWITCHING LANE NOW";
+                currentAiAction = "Switch";
                 aiDisplay.color = new Color(1f, 0.5f, 0f); // Change text color to orange for ΑΙ activeintervention
                 carController.SetTargetLane(aiSuggestedLane);
                 Debug.Log("AI Intervention: Switching to Lane " + aiSuggestedLane);
@@ -121,6 +142,12 @@ public class TrialManager : MonoBehaviour
 
             messageDisplayed = true;
         }
+    }
+
+    public bool IsAIPresentlyActive()
+    {
+        //Override message should only be displayed if the AI has spoken and the car has not yet passed the obstacle
+        return messageDisplayed && !obstaclePassed;
     }
 
     void ShowPostObstacleMessage()
@@ -136,15 +163,12 @@ public class TrialManager : MonoBehaviour
 
     void PerformReset()
     {
-        TrialData currentTrial = trials[currentTrialIndex];
-        bool intervened = carController.didPlayerIntervene; // Check if the player intervened during the trial
-        Debug.Log("Trial " + currentTrialIndex + " Did Player Intervene ? " + intervened);
-
-        // Here we will add the code that will write to the .csv file
-        // Example: SaveToCSV(currentTrialIndex, intervened, trials[currentTrialIndex].aiIsLying);
+        // store the trial data for the current trial before resetting for the next one
+        LogTrialData();
 
         // Reset the intervention flag for the next trial
         carController.ResetIntervention();
+        reactionRecorded = false;
 
         // Reset the car's position to the starting point for the next trial
         playerCar.position = new Vector3(playerCar.position.x, -1.65f, 0f);
@@ -159,22 +183,10 @@ public class TrialManager : MonoBehaviour
         // If we've reached the end of the trials list, we can choose to loop back to the first trial or simply stop updating.
         if (currentTrialIndex >= trials.Count)
         {
-            if (aiDisplay != null) aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
-            Debug.Log("Experiment Finished. Car Locked.");
-            playerCar.position = new Vector3(0f, 0f, 0f);
-
-            // Lock the car by disabling movement 
-            if (carController != null) carController.canMove = false;
-
-            // kinematic mode to prevent any further physics interactions
-            carRigidbody.linearVelocity = Vector3.zero;
-            carRigidbody.angularVelocity = Vector3.zero;
-            carRigidbody.isKinematic = true;
-
-            // Disable this script to stop any further updates
-            this.enabled = false;
+            FinishExperiment();
             return;
         }
+
         // Update for the next trial
         UpdateTrial();
     }
@@ -221,5 +233,55 @@ public class TrialManager : MonoBehaviour
             messageDisplayed = false;
             obstaclePassed = false;
         }
+    }
+
+    private void LogTrialData()
+    {
+        if (currentTrialIndex >= trials.Count) return;
+
+        TrialData currentTrial = trials[currentTrialIndex];
+
+        // If the player intervened, calculate the reaction time; otherwise, it will be recorded as 0
+        float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
+
+        // Determine if the final lane was the correct choice based on the trial's shouldGoLeft value
+        int finalLane = (playerCar.position.x < 0) ? -1 : 1;
+        bool success = (finalLane == -1 && currentTrial.shouldGoLeft) || (finalLane == 1 && !currentTrial.shouldGoLeft);
+
+        // Determine AI action based on the message displayed to the player
+        string aiAction = currentAiAction;
+
+        // Save the trial data to the CSV file using the CSVManager
+        CSVManager.SaveTrial(
+            participantID,
+            currentTrialIndex,
+            currentTrial.weatherIntensity,
+            currentTrial.aiIsLying,
+            aiAction,
+            reactionRecorded,
+            firstReactionTime,
+            finalLane,
+            success
+        );
+
+        Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex}, Success: {success}, RT: {firstReactionTime:F2}s");
+    }
+
+    void FinishExperiment()
+    {
+        if (aiDisplay != null) aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
+        Debug.Log("Experiment Finished. Car Locked.");
+        playerCar.position = new Vector3(0f, 0f, 0f);
+
+        // Lock the car by disabling movement 
+        if (carController != null) carController.canMove = false;
+
+        // kinematic mode to prevent any further physics interactions
+        carRigidbody.linearVelocity = Vector3.zero;
+        carRigidbody.angularVelocity = Vector3.zero;
+        carRigidbody.isKinematic = true;
+
+        // Disable this script to stop any further updates
+        this.enabled = false;
     }
 }
