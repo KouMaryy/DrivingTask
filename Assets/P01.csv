@@ -1,7 +1,0 @@
-Trial_ID,Weather_Intensity,AI_Lying,AI_Action,Intervened,Reaction_Time_Seconds,Final_Lane,Success,Timestamp
-0,0,False,Switch,False,0,1,True,2026-03-08 00:51:57
-0,0,False,Maintain,True,0.996,1,True,2026-03-08 01:31:39
-0,0,False,Switch,False,0,1,True,2026-03-08 01:32:35
-1,1,False,Switch,False,0,-1,True,2026-03-08 01:32:49
-2,0.5,False,Maintain,False,0,-1,True,2026-03-08 01:33:03
-3,0,False,Switch,False,0,1,True,2026-03-08 01:33:17
