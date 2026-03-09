@@ -10,7 +10,6 @@ public class TrialData
     public bool aiIsLying;       // AI's honesty status for this trial (true if the AI is lying, false if it's telling the truth)
     [Range(0, 1)]
     public float weatherIntensity; // 0 = Clear, 1 = Heavy (used to control the intensity of weather effects in the trial)
-    public bool leftIsSolid; // true = left lane has the solid obstacle, false = right lane has the solid obstacle (the other lane will have a fragile obstacle)
 }
 
 [System.Serializable]
@@ -188,16 +187,20 @@ public class TrialManager : MonoBehaviour
         float randomY = rotations[Random.Range(0, rotations.Length)];
         Quaternion randomRotation = Quaternion.Euler(0, randomY, 0);
 
-        // 3. Spawn the solid and fragile obstacles based on the current trial's leftIsSolid value
-        if (currentTrial.leftIsSolid)
+        // 3. Spawn the solid and fragile obstacles based on the current trial's shouldGoLeft value
+        if (currentTrial.shouldGoLeft)
         {
-            activeLeftObstacle = Instantiate(solidPrefab, leftPos, randomRotation);
-            activeRightObstacle = Instantiate(fragilePrefab, rightPos, randomRotation);
+            // shouldGoLeft is true, Left = fragile (Safe), Right = Solid (Danger)
+            activeLeftObstacle = Instantiate(fragilePrefab, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(solidPrefab, rightPos, randomRotation);
+            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is LEFT (Fragile spawned there)");
         }
         else
         {
-            activeLeftObstacle = Instantiate(fragilePrefab, leftPos, randomRotation);
-            activeRightObstacle = Instantiate(solidPrefab, rightPos, randomRotation);
+            // shouldGoLeft is false, Left = solid (Danger), Right = Fragile (Safe)
+            activeLeftObstacle = Instantiate(solidPrefab, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(fragilePrefab, rightPos, randomRotation);
+            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is RIGHT (Fragile spawned there)");
         }
     }
 
