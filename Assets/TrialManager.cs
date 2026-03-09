@@ -12,6 +12,14 @@ public class TrialData
     public float weatherIntensity; // 0 = Clear, 1 = Heavy (used to control the intensity of weather effects in the trial)
 }
 
+[System.Serializable]
+public class ObstaclePair
+{
+    public string pairName;
+    public GameObject solidPrefab;
+    public GameObject fragilePrefab;
+}
+
 public class TrialManager : MonoBehaviour
 {
     [Header("References")]
@@ -34,6 +42,14 @@ public class TrialManager : MonoBehaviour
     public GameObject weatherObject;
     private ParticleSystem snowParticles;
 
+    [Header("Obstacle Spawning")]
+    public GameObject solidPrefab;  // Solid obstacle prefab (e.g., a concrete barrier)
+    public GameObject fragilePrefab; // Fragile obstacle prefab (e.g., a cardboard box)
+    public float obstacleZ = 260f;   // The distance at which the obstacles will appear (same as triggerZ)
+
+    private GameObject activeLeftObstacle;
+    private GameObject activeRightObstacle;
+
     [Header("Data Logging")]
     public string participantID = "P01"; // Unique identifier for the participant, should be set from the Unity Inspector before each participant starts the experiment
 
@@ -42,6 +58,10 @@ public class TrialManager : MonoBehaviour
     private float firstInterventionTime;
     private bool reactionRecorded = false;
     private string currentAiAction = "Maintain";
+
+    // List of obstacle pairs to choose from for each trial
+    public List<ObstaclePair> obstaclePool;
+    public int obstaclePairIndex; // Index to keep track of which obstacle pair is currently active
 
     void Start()
     {
@@ -150,6 +170,40 @@ public class TrialManager : MonoBehaviour
         return messageDisplayed && !obstaclePassed;
     }
 
+    void SpawnObstacles()
+    {
+        // 1. Clear existing obstacles if they exist before spawning new ones for the current trial
+        if (activeLeftObstacle != null) Destroy(activeLeftObstacle);
+        if (activeRightObstacle != null) Destroy(activeRightObstacle);
+
+        TrialData currentTrial = trials[currentTrialIndex];
+
+        // 2. Positions for the left and right obstacles based on the obstacleZ position and lane distance
+        Vector3 leftPos = new Vector3(-6f, 7.5f, obstacleZ);
+        Vector3 rightPos = new Vector3(6f, 7.5f, obstacleZ);
+
+        // Create a random rotation for the obstacles to add visual variety
+        float[] rotations = { 0f, 45f, 90f, 135f };
+        float randomY = rotations[Random.Range(0, rotations.Length)];
+        Quaternion randomRotation = Quaternion.Euler(0, randomY, 0);
+
+        // 3. Spawn the solid and fragile obstacles based on the current trial's shouldGoLeft value
+        if (currentTrial.shouldGoLeft)
+        {
+            // shouldGoLeft is true, Left = fragile (Safe), Right = Solid (Danger)
+            activeLeftObstacle = Instantiate(fragilePrefab, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(solidPrefab, rightPos, randomRotation);
+            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is LEFT (Fragile spawned there)");
+        }
+        else
+        {
+            // shouldGoLeft is false, Left = solid (Danger), Right = Fragile (Safe)
+            activeLeftObstacle = Instantiate(solidPrefab, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(fragilePrefab, rightPos, randomRotation);
+            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is RIGHT (Fragile spawned there)");
+        }
+    }
+
     void ShowPostObstacleMessage()
     {
         if (aiDisplay != null)
@@ -232,6 +286,9 @@ public class TrialManager : MonoBehaviour
             // Reset flags for the new trial
             messageDisplayed = false;
             obstaclePassed = false;
+
+            // Spawn the obstacles for the new trial based on the current trial's settings
+            SpawnObstacles();
         }
     }
 
