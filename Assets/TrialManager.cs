@@ -350,7 +350,11 @@ public class TrialManager : MonoBehaviour
 
     void FinishExperiment()
     {
-        if (aiDisplay != null) aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
+        if (aiDisplay != null) 
+        {
+            aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
+            aiDisplay.color = Color.yellow;
+        }
         Debug.Log("Experiment Finished. Car Locked.");
         playerCar.position = new Vector3(0f, 0f, 0f);
 
