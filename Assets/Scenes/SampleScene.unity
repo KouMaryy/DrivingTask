@@ -153,22 +153,42 @@ MonoBehaviour:
   playerCar: {fileID: 1237220851}
   aiDisplay: {fileID: 752542068}
   trials:
-  - aiMessage: TRIAL 1 :\n DANGER to the LEFT
+  - aiMessage: TRIAL 1
     shouldGoLeft: 0
     aiIsLying: 0
     weatherIntensity: 0
-  - aiMessage: TRIAL 2 :\n DANGER to the RIGHT
-    shouldGoLeft: 1
-    aiIsLying: 0
-    weatherIntensity: 1
-  - aiMessage: TRIAL 3 :\n DANGER to the RIGHT
+  - aiMessage: 'TRIAL 2 '
     shouldGoLeft: 1
     aiIsLying: 0
     weatherIntensity: 0.5
-  - aiMessage: TRIAL 4 :\n DANGER to the LEFT
+  - aiMessage: 'TRIAL 3 '
     shouldGoLeft: 0
     aiIsLying: 0
+    weatherIntensity: 1
+  - aiMessage: 'TRIAL 4 '
+    shouldGoLeft: 1
+    aiIsLying: 1
+    weatherIntensity: 0.5
+  - aiMessage: 'TRIAL 5 '
+    shouldGoLeft: 1
+    aiIsLying: 0
     weatherIntensity: 0
+  - aiMessage: 'TRIAL 6 '
+    shouldGoLeft: 1
+    aiIsLying: 0
+    weatherIntensity: 1
+  - aiMessage: TRIAL 8
+    shouldGoLeft: 0
+    aiIsLying: 1
+    weatherIntensity: 1
+  - aiMessage: 'TRIAL 9 '
+    shouldGoLeft: 1
+    aiIsLying: 0
+    weatherIntensity: 0
+  - aiMessage: 'TRIAL 4 '
+    shouldGoLeft: 1
+    aiIsLying: 1
+    weatherIntensity: 0.5
   resetZ: 320
   downForce: 50000
   triggerZ: 260
@@ -5841,7 +5861,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   canMove: 1
-  forwardSpeed: 23
+  forwardSpeed: 38
   laneDistance: 6
   sideSpeed: 10
   steeringWheel: {fileID: 2545001395375947676}

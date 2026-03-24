@@ -37,6 +37,7 @@ public class TrialManager : MonoBehaviour
     private bool messageDisplayed = false; // flag to ensure the AI message is displayed only once per trial
     private bool obstaclePassed = false; // flag to track if the car has passed the obstacle for the current trial
     private int currentTrialIndex = 0; // Index to keep track of the current trial
+    private bool hasCrashedThisTrial = false;
 
     [Header("Weather Settings")]
     public GameObject weatherObject;
@@ -206,14 +207,36 @@ public class TrialManager : MonoBehaviour
 
     void ShowPostObstacleMessage()
     {
-        if (aiDisplay != null)
+       if (aiDisplay != null && !obstaclePassed)
+    {
+        obstaclePassed = true;
+
+        // If the flag is true, we keep the Red Crashed text.
+        // Otherwise, we show the Green Safe Passage text.
+        if (hasCrashedThisTrial)
         {
-            aiDisplay.text = "Consequences";
-            aiDisplay.color = Color.white;
-            obstaclePassed = true;
-            Debug.Log("Car passed the obstacle point.");
+            aiDisplay.text = "CRASHED";
+            aiDisplay.color = Color.red;
         }
+        else
+        {
+            aiDisplay.text = "SAFE PASSAGE";
+            aiDisplay.color = Color.green;
+        }
+        Debug.Log("Obstacle result displayed: " + aiDisplay.text);
     }
+    }
+
+    public void TriggerCrash()
+{
+    if (!hasCrashedThisTrial) 
+    {
+        hasCrashedThisTrial = true;
+        aiDisplay.text = "CRASHED";
+        aiDisplay.color = Color.red;
+        Debug.Log("<color=red>Crash detected! UI updated to Red.</color>");
+    }
+}
 
     void PerformReset()
     {
@@ -278,7 +301,8 @@ public class TrialManager : MonoBehaviour
                 }
             }
 
-
+            hasCrashedThisTrial = false; // Reset for the new trial
+            
             // Reset the AI display to a default message for the next trial
             aiDisplay.text = "SAFE";
             aiDisplay.color = Color.white;
