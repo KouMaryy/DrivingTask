@@ -5861,7 +5861,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   canMove: 1
-  forwardSpeed: 38
+  forwardSpeed: 23
   laneDistance: 6
   sideSpeed: 10
   steeringWheel: {fileID: 2545001395375947676}
@@ -14030,13 +14030,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1513684880581287859}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.000000021855692, y: 0.00000004371139, z: 0.00000004371139, w: 1}
+  m_LocalRotation: {x: 0.06975381, y: 0.0087053, z: -0.0006087338, w: 0.9975261}
   m_LocalPosition: {x: 0, y: 1.811483, z: 0.6081649}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1534759426816084237}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 8, y: 1, z: 0}
 --- !u!33 &5995339488992239284
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -17483,13 +17483,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8899314064135019615}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 9.553426e-16, w: 1}
+  m_LocalRotation: {x: 0.06975647, y: 0, z: 0, w: 0.9975641}
   m_LocalPosition: {x: -0.019480357, y: 0.4598925, z: -0.12059156}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.46, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5664693306976972855}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 8, y: 0, z: 0}
 --- !u!65 &8964831927590009858
 BoxCollider:
   m_ObjectHideFlags: 0
