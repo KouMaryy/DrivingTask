@@ -12,13 +12,6 @@ public class TrialData
     public float weatherIntensity; // 0 = Clear, 1 = Heavy (used to control the intensity of weather effects in the trial)
 }
 
-[System.Serializable]
-public class ObstaclePair
-{
-    public string pairName;
-    public GameObject solidPrefab;
-    public GameObject fragilePrefab;
-}
 
 public class TrialManager : MonoBehaviour
 {
@@ -43,11 +36,12 @@ public class TrialManager : MonoBehaviour
     public GameObject weatherObject;
     private ParticleSystem snowParticles;
 
-    [Header("Obstacle Spawning")]
-    public GameObject solidPrefab;  // Solid obstacle prefab (e.g., a concrete barrier)
-    public GameObject fragilePrefab; // Fragile obstacle prefab (e.g., a cardboard box)
-    public float obstacleZ = 260f;   // The distance at which the obstacles will appear (same as triggerZ)
+    [Header("Obstacle Collections")]
+    public List<GameObject> dangerousPrefabs; // 3 solid objects here
+    public List<GameObject> safePrefabs;      // 3 fragile objects here
 
+    [Header("Obstacle Spawning")]
+    public float obstacleZ = 260f;   // The distance at which the obstacles will appear (same as triggerZ)
     private GameObject activeLeftObstacle;
     private GameObject activeRightObstacle;
 
@@ -59,10 +53,8 @@ public class TrialManager : MonoBehaviour
     private float firstInterventionTime;
     private bool reactionRecorded = false;
     private string currentAiAction = "Maintain";
-
-    // List of obstacle pairs to choose from for each trial
-    public List<ObstaclePair> obstaclePool;
-    public int obstaclePairIndex; // Index to keep track of which obstacle pair is currently active
+    private string currentDangerousObstacleName;
+    private string currentSafeObstacleName;
 
     void Start()
     {
@@ -89,7 +81,6 @@ public class TrialManager : MonoBehaviour
         // power of the downward force applied to the car, to keep it grounded at high speeds
         // using playerCar.up to apply the force downwards
         carRigidbody.AddForce(-playerCar.up * downForce);
-
     }
 
     void Update()
@@ -177,66 +168,81 @@ public class TrialManager : MonoBehaviour
         if (activeLeftObstacle != null) Destroy(activeLeftObstacle);
         if (activeRightObstacle != null) Destroy(activeRightObstacle);
 
+        // 2. Error Check
+        if (dangerousPrefabs.Count == 0 || safePrefabs.Count == 0)
+        {
+            Debug.LogError("Obstacle lists are empty! Assign prefabs in the Inspector.");
+            return;
+        }
+
+        // 3. Pick ONE random dangerous and ONE random safe object independently
+        GameObject chosenDangerous = dangerousPrefabs[Random.Range(0, dangerousPrefabs.Count)];
+        GameObject chosenSafe = safePrefabs[Random.Range(0, safePrefabs.Count)];
+
+        // store the names of the chosen obstacles for data logging purposes
+        currentDangerousObstacleName = chosenDangerous.name.Replace("(Clone)", "");
+        currentSafeObstacleName = chosenSafe.name.Replace("(Clone)", "");
+
         TrialData currentTrial = trials[currentTrialIndex];
 
-        // 2. Positions for the left and right obstacles based on the obstacleZ position and lane distance
+        // 4. Positions for the left and right obstacles based on lane distance
         Vector3 leftPos = new Vector3(-6f, 7.5f, obstacleZ);
         Vector3 rightPos = new Vector3(6f, 7.5f, obstacleZ);
 
-        // Create a random rotation for the obstacles to add visual variety
+        // 5. Create a random rotation for the obstacles to add visual variety
         float[] rotations = { 0f, 45f, 90f, 135f };
         float randomY = rotations[Random.Range(0, rotations.Length)];
         Quaternion randomRotation = Quaternion.Euler(0, randomY, 0);
 
-        // 3. Spawn the solid and fragile obstacles based on the current trial's shouldGoLeft value
+        // 6. Spawn the solid and fragile obstacles based on the current trial's shouldGoLeft value
         if (currentTrial.shouldGoLeft)
         {
             // shouldGoLeft is true, Left = fragile (Safe), Right = Solid (Danger)
-            activeLeftObstacle = Instantiate(fragilePrefab, leftPos, randomRotation);
-            activeRightObstacle = Instantiate(solidPrefab, rightPos, randomRotation);
-            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is LEFT (Fragile spawned there)");
+            activeLeftObstacle = Instantiate(chosenSafe, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(chosenDangerous, rightPos, randomRotation);
+            Debug.Log($"Trial {currentTrialIndex}: Spawning SAFE({chosenSafe.name}) Left, DANGER({chosenDangerous.name}) Right");
         }
         else
         {
             // shouldGoLeft is false, Left = solid (Danger), Right = Fragile (Safe)
-            activeLeftObstacle = Instantiate(solidPrefab, leftPos, randomRotation);
-            activeRightObstacle = Instantiate(fragilePrefab, rightPos, randomRotation);
-            Debug.Log("Trial " + currentTrialIndex + ": Safe Lane is RIGHT (Fragile spawned there)");
+            activeLeftObstacle = Instantiate(chosenDangerous, leftPos, randomRotation);
+            activeRightObstacle = Instantiate(chosenSafe, rightPos, randomRotation);
+            Debug.Log($"Trial {currentTrialIndex}: Spawning DANGER({chosenDangerous.name}) Left, SAFE({chosenSafe.name}) Right");
         }
     }
 
     void ShowPostObstacleMessage()
     {
-       if (aiDisplay != null && !obstaclePassed)
-    {
-        obstaclePassed = true;
+        if (aiDisplay != null && !obstaclePassed)
+        {
+            obstaclePassed = true;
 
-        // If the flag is true, we keep the Red Crashed text.
-        // Otherwise, we show the Green Safe Passage text.
-        if (hasCrashedThisTrial)
-        {
-            aiDisplay.text = "CRASHED";
-            aiDisplay.color = Color.red;
+            // If the flag is true, we keep the Red Crashed text.
+            // Otherwise, we show the Green Safe Passage text.
+            if (hasCrashedThisTrial)
+            {
+                aiDisplay.text = "CRASHED";
+                aiDisplay.color = Color.red;
+            }
+            else
+            {
+                aiDisplay.text = "SAFE PASSAGE";
+                aiDisplay.color = Color.green;
+            }
+            Debug.Log("Obstacle result displayed: " + aiDisplay.text);
         }
-        else
-        {
-            aiDisplay.text = "SAFE PASSAGE";
-            aiDisplay.color = Color.green;
-        }
-        Debug.Log("Obstacle result displayed: " + aiDisplay.text);
-    }
     }
 
     public void TriggerCrash()
-{
-    if (!hasCrashedThisTrial) 
     {
-        hasCrashedThisTrial = true;
-        aiDisplay.text = "CRASHED";
-        aiDisplay.color = Color.red;
-        Debug.Log("<color=red>Crash detected! UI updated to Red.</color>");
+        if (!hasCrashedThisTrial)
+        {
+            hasCrashedThisTrial = true;
+            aiDisplay.text = "CRASHED";
+            aiDisplay.color = Color.red;
+            Debug.Log("<color=red>Crash detected! UI updated to Red.</color>");
+        }
     }
-}
 
     void PerformReset()
     {
@@ -302,7 +308,7 @@ public class TrialManager : MonoBehaviour
             }
 
             hasCrashedThisTrial = false; // Reset for the new trial
-            
+
             // Reset the AI display to a default message for the next trial
             aiDisplay.text = "SAFE";
             aiDisplay.color = Color.white;
@@ -322,6 +328,17 @@ public class TrialManager : MonoBehaviour
 
         TrialData currentTrial = trials[currentTrialIndex];
 
+        // Translate Weather Intensity to Labels
+        string weatherLabel = "Clear";
+        if (currentTrial.weatherIntensity > 0.1f && currentTrial.weatherIntensity <= 0.5f)
+            weatherLabel = "Low Fog";
+        else if (currentTrial.weatherIntensity > 0.5f)
+            weatherLabel = "Heavy Fog";
+
+        // Translate Lane Number to Labels
+        // Left is -1, Right is 1
+        string laneLabel = (playerCar.position.x < 0) ? "Left" : "Right";
+
         // If the player intervened, calculate the reaction time; otherwise, it will be recorded as 0
         float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
 
@@ -336,13 +353,15 @@ public class TrialManager : MonoBehaviour
         CSVManager.SaveTrial(
             participantID,
             currentTrialIndex,
-            currentTrial.weatherIntensity,
+            weatherLabel,
             currentTrial.aiIsLying,
             aiAction,
             reactionRecorded,
             firstReactionTime,
-            finalLane,
-            success
+            laneLabel,
+            success,
+            currentDangerousObstacleName,
+            currentSafeObstacleName
         );
 
         Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex}, Success: {success}, RT: {firstReactionTime:F2}s");
@@ -350,9 +369,9 @@ public class TrialManager : MonoBehaviour
 
     void FinishExperiment()
     {
-        if (aiDisplay != null) 
+        if (aiDisplay != null)
         {
-            aiDisplay.text = "EXPERIMENT COMPLETE\nENGINE STOPPED";
+            aiDisplay.text = "EXPERIMENT COMPLETED\nENGINE STOPPED";
             aiDisplay.color = Color.yellow;
         }
         Debug.Log("Experiment Finished. Car Locked.");
