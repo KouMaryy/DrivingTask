@@ -21,6 +21,8 @@ public class CarController : MonoBehaviour
 
     [HideInInspector]
     public bool didPlayerIntervene = false; // Flag to track if the player has taken control during the trial
+    [HideInInspector]
+    public int interventionCount = 0; // Counter for the number of interventions
 
     // This function is automatically called from Player Input component
     public void OnMove(InputValue value)
@@ -32,19 +34,21 @@ public class CarController : MonoBehaviour
 
         if (input.x != 0)
         {
-            // left lane = -1, right lane = 1
-            targetLane = (input.x > 0) ? 1 : -1;
-
-            // Set the flag to indicate that the player has intervened
-            didPlayerIntervene = true;
-
-            // Change color to white to show that the player has taken control
             TrialManager manager = GameObject.FindFirstObjectByType<TrialManager>();
+
             if (manager != null && manager.IsAIPresentlyActive())
             {
+                 // Increase the total count for the CSV
+                interventionCount++;
+                didPlayerIntervene = true;
+
+                // UI Feedback
                 manager.aiDisplay.text = "MANUAL OVERRIDE";
                 manager.aiDisplay.color = Color.white;
             }
+
+            // left lane = -1, right lane = 1
+            targetLane = (input.x > 0) ? 1 : -1;
         }
     }
 
@@ -101,5 +105,6 @@ public class CarController : MonoBehaviour
     public void ResetIntervention()
     {
         didPlayerIntervene = false;
+        interventionCount = 0;
     }
 }
