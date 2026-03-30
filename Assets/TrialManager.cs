@@ -32,6 +32,11 @@ public class TrialManager : MonoBehaviour
     private int currentTrialIndex = 0; // Index to keep track of the current trial
     private bool hasCrashedThisTrial = false;
 
+    [Header("Scoring System")]
+    public int currentScore = 1000;
+    public TextMeshProUGUI scoreDisplay;
+    public TextMeshProUGUI trialCounter; // Optional: for the Top-Left counter
+
     [Header("Weather Settings")]
     public GameObject weatherObject;
     private ParticleSystem snowParticles;
@@ -226,6 +231,18 @@ public class TrialManager : MonoBehaviour
         {
             obstaclePassed = true;
 
+            //Calculate points immediately when passing/crashing
+            string weatherLabel = (trials[currentTrialIndex].weatherIntensity == 0) ? "Clear" :
+                                 (trials[currentTrialIndex].weatherIntensity <= 0.5f) ? "Low Fog" : "Heavy Fog";
+
+            string finalLaneLabel = (playerCar.position.x < -2f) ? "Left" : "Right";
+
+            int pointsChanged = CalculateScore(trials[currentTrialIndex].aiIsLying, reactionRecorded, !hasCrashedThisTrial, weatherLabel);
+
+            // Update Score in the UI 
+            currentScore += pointsChanged;
+            if (scoreDisplay != null) scoreDisplay.text = $"Score: {currentScore}";
+
             // If the flag is true, we keep the Red Crashed text.
             // Otherwise, we show the Green Safe Passage text.
             if (hasCrashedThisTrial)
@@ -286,12 +303,15 @@ public class TrialManager : MonoBehaviour
     {
         if (aiDisplay != null && currentTrialIndex < trials.Count)
         {
+            if (trialCounter != null)
+                trialCounter.text = $"Trial {currentTrialIndex + 1} / {trials.Count}";
+
             TrialData currentTrial = trials[currentTrialIndex];
             float intensity = currentTrial.weatherIntensity;
 
             // Fog settings based on the trial's weather intensity
             RenderSettings.fog = (intensity > 0);
-            RenderSettings.fogDensity = intensity * 0.02f;
+            RenderSettings.fogDensity = intensity * 0.03f;
 
             // Snow particle settings based on the trial's weather intensity
             if (weatherObject != null && snowParticles != null)
@@ -346,24 +366,14 @@ public class TrialManager : MonoBehaviour
         else if (currentTrial.weatherIntensity > 0.5f)
             weatherLabel = "Heavy Fog";
 
-        // Translate Lane Number to Labels
-        // Left is -1, Right is 1
-        // string finalLaneLabel = (playerCar.position.x < 0) ? "Left" : "Right";
+        // Translate Lane Number to Labels : Left is -1, Right is 1
         string finalLaneLabel = (playerCar.position.x < -2f) ? "Left" : "Right";
 
-        // If the player intervened, calculate the reaction time; otherwise, it will be recorded as 0
+        // If the player intervened, calculate the reaction time, otherwise, it will be recorded as 0
         float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
 
-        // Determine if the final lane was the correct choice based on the trial's shouldGoLeft value
-        bool success;
-        if (currentTrial.shouldGoLeft)
-        {
-            success = (finalLaneLabel == "Left");
-        }
-        else
-        {
-            success = (finalLaneLabel == "Right");
-        }
+        // Determine if the final lane was the correct choice
+        bool success = !hasCrashedThisTrial;
 
         // Determine AI action based on the message displayed to the player
         string aiAction = currentAiAction;
@@ -371,7 +381,7 @@ public class TrialManager : MonoBehaviour
         // Save the trial data to the CSV file using the CSVManager
         CSVManager.SaveTrial(
             participantID,
-            currentTrialIndex,
+            currentTrialIndex+1, // +1 to make it 1-indexed for better readability in the CSV
             weatherLabel,
             currentTrial.aiIsLying,
             aiAction,
@@ -381,11 +391,40 @@ public class TrialManager : MonoBehaviour
             aiSuggestedlLaneLabel,
             finalLaneLabel,
             success,
+            currentScore,
             currentDangerousObstacleName,
             currentSafeObstacleName
         );
 
         Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex}, Success: {success}, RT: {firstReactionTime:F2}s");
+    }
+
+    private int CalculateScore(bool aiLied, bool userIntervened, bool success, string weatherLabel)
+    {
+        int points = 0;
+
+        //SCORING LOGIC (The SDT Matrix)
+        if (aiLied) // DECEPTIVE AI
+        {
+            if (userIntervened && success) // HIT: Correctly overrode a lying AI and avoided the crash
+            {
+                points = (weatherLabel == "Clear") ? 50 : (weatherLabel == "Low Fog") ? 75 : 100;
+            }
+            else if (!userIntervened && !success) // MISS: Followed a lying AI and crashed
+            {
+                points = (weatherLabel == "Clear") ? -200 : (weatherLabel == "Low Fog") ? -150 : -100;
+            }
+        }
+        else // TRUTHFUL AI
+        {
+            if (userIntervened) // FALSE ALARM: Overrode a truthful AI
+            {
+                points = (weatherLabel == "Clear") ? -50 : (weatherLabel == "Low Fog") ? -35 : -20;
+            }
+            // Correct Rejection is implicitly 0
+        }
+
+        return points;
     }
 
     void FinishExperiment()
