@@ -175,27 +175,27 @@ MonoBehaviour:
     shouldGoLeft: 0
     aiIsLying: 0
     weatherIntensity: 1
-  - aiMessage: 'TRIAL 4 '
+  - aiMessage: TRIAL 4
     shouldGoLeft: 1
-    aiIsLying: 1
+    aiIsLying: 0
     weatherIntensity: 0.5
   - aiMessage: 'TRIAL 5 '
     shouldGoLeft: 1
     aiIsLying: 0
     weatherIntensity: 0
-  - aiMessage: 'TRIAL 6 '
+  - aiMessage: TRIAL 6
     shouldGoLeft: 1
-    aiIsLying: 0
+    aiIsLying: 1
     weatherIntensity: 1
-  - aiMessage: TRIAL 8
+  - aiMessage: TRIAL 7
     shouldGoLeft: 0
     aiIsLying: 1
     weatherIntensity: 1
-  - aiMessage: 'TRIAL 9 '
+  - aiMessage: 'TRIAL 8 '
     shouldGoLeft: 1
-    aiIsLying: 0
+    aiIsLying: 1
     weatherIntensity: 0
-  - aiMessage: 'TRIAL 4 '
+  - aiMessage: 'TRIAL 10 '
     shouldGoLeft: 1
     aiIsLying: 1
     weatherIntensity: 0.5
@@ -213,7 +213,7 @@ MonoBehaviour:
   - {fileID: 999404910}
   - {fileID: 15937980}
   obstacleZ: 260
-  participantID: P01
+  participantID: P02
 --- !u!4 &252712032
 Transform:
   m_ObjectHideFlags: 0
@@ -5880,13 +5880,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   canMove: 1
-  forwardSpeed: 35
+  forwardSpeed: 31
   laneDistance: 6
   sideSpeed: 10
   steeringWheel: {fileID: 2545001395375947676}
   maxSteerAngle: 45
   wheelRotationSpeed: 5
   didPlayerIntervene: 0
+  interventionCount: 0
 --- !u!65 &1237220848
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6871,7 +6872,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 20, y: 20}
+  m_AnchoredPosition: {x: 19.999939, y: 20}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 1, y: 0}
 --- !u!23 &293190553716341606
@@ -18170,7 +18171,7 @@ PrefabInstance:
       objectReference: {fileID: 7156546980218599573, guid: b3daf07ec7c294ee8a703fc5b3f45142, type: 3}
     - target: {fileID: 6401066930929801323, guid: edf00e3cbf4b14fcc86f2c9b7bcfb9ec, type: 3}
       propertyPath: m_Name
-      value: Obstacle_Fragile_Crdboard
+      value: Obstacle_Fragile_Cardboard
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

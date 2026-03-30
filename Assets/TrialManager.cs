@@ -50,6 +50,7 @@ public class TrialManager : MonoBehaviour
 
     // Data for CSV : Variables for reaction time measurement and player intervention tracking
     private float messageStartTime;
+    private string aiSuggestedlLaneLabel;
     private float firstInterventionTime;
     private bool reactionRecorded = false;
     private string currentAiAction = "Maintain";
@@ -99,9 +100,12 @@ public class TrialManager : MonoBehaviour
         //Reaction Recording: If the AI has displayed a message and the player has intervened for the first time
         if (messageDisplayed && !obstaclePassed && !reactionRecorded && carController.didPlayerIntervene)
         {
-            firstInterventionTime = Time.time;
-            reactionRecorded = true;
-            Debug.Log("Reaction Recorded: " + (firstInterventionTime - messageStartTime) + "s");
+            if (Time.time >= messageStartTime) // extra safety check to avoid the "Same Frame" Problem
+            {
+                firstInterventionTime = Time.time;
+                reactionRecorded = true;
+                Debug.Log("Reaction Recorded: " + (firstInterventionTime - messageStartTime) + "s");
+            }
         }
 
         if (!obstaclePassed && playerCar.position.z >= triggerZ)
@@ -112,6 +116,7 @@ public class TrialManager : MonoBehaviour
 
     void ShowAiMessage()
     {
+
         if (aiDisplay != null && currentTrialIndex < trials.Count)
         {
             TrialData currentTrial = trials[currentTrialIndex];
@@ -121,20 +126,24 @@ public class TrialManager : MonoBehaviour
             reactionRecorded = false;
             carController.ResetIntervention(); // Reset the intervention flag at the start of the trial
 
-            // calculate the lane suggestion based on the current trial's shouldGoLeft value and the AI's honesty status
-            // If shouldGoLeft is true, aiSuggestedLane = -1, otherwise aiSuggestedLane = 1
-            int aiSuggestedLane = currentTrial.shouldGoLeft ? -1 : 1;
+            // The ground truth (What is actually safe))
+            int safeLane = currentTrial.shouldGoLeft ? -1 : 1;
+
+            //The AI suggestion
+            int suggestedLane = safeLane;
             if (currentTrial.aiIsLying)
             {
-                aiSuggestedLane *= -1; // If the AI is lying, we invert the suggested lane.
+                suggestedLane *= -1; // If the AI is lying, it suggests the opposite of the safe lane 
             }
 
-            // Find the current lane of the car based on its x position
-            int currentLane;
-            if (playerCar.position.x < -2f) currentLane = -1; // Left
-            else currentLane = 1; // Right
+            // Store the label for the CSV (matches the logic above)
+            aiSuggestedlLaneLabel = (suggestedLane == -1) ? "Left" : "Right";
 
-            if (currentLane == aiSuggestedLane)
+            // Determine the current lane 
+            int currentLane = (playerCar.position.x < -2f) ? -1 : 1;
+
+            // Display the AI message and command the car to steer if necessary
+            if (currentLane == suggestedLane)
             {
                 // car is already in the AI suggested lane, no need to change lanes
                 aiDisplay.text = "SAFE LANE MAINTAINED";
@@ -148,8 +157,8 @@ public class TrialManager : MonoBehaviour
                 aiDisplay.text = "DANGER DETECTED\nSWITCHING LANE NOW";
                 currentAiAction = "Switch";
                 aiDisplay.color = new Color(1f, 0.5f, 0f); // Change text color to orange for ΑΙ activeintervention
-                carController.SetTargetLane(aiSuggestedLane);
-                Debug.Log("AI Intervention: Switching to Lane " + aiSuggestedLane);
+                carController.SetTargetLane(suggestedLane);
+                Debug.Log("AI Intervention: Switching to Lane " + suggestedLane);
             }
 
             messageDisplayed = true;
@@ -295,7 +304,7 @@ public class TrialManager : MonoBehaviour
                     if (!snowParticles.isPlaying) snowParticles.Play();
 
                     var emission = snowParticles.emission;
-                    emission.rateOverTime = intensity * 2000f;
+                    emission.rateOverTime = intensity * 2500f;
                 }
                 else
                 {
@@ -316,6 +325,8 @@ public class TrialManager : MonoBehaviour
             // Reset flags for the new trial
             messageDisplayed = false;
             obstaclePassed = false;
+            reactionRecorded = false;
+            firstInterventionTime = 0;
 
             // Spawn the obstacles for the new trial based on the current trial's settings
             SpawnObstacles();
@@ -337,14 +348,22 @@ public class TrialManager : MonoBehaviour
 
         // Translate Lane Number to Labels
         // Left is -1, Right is 1
-        string laneLabel = (playerCar.position.x < 0) ? "Left" : "Right";
+        // string finalLaneLabel = (playerCar.position.x < 0) ? "Left" : "Right";
+        string finalLaneLabel = (playerCar.position.x < -2f) ? "Left" : "Right";
 
         // If the player intervened, calculate the reaction time; otherwise, it will be recorded as 0
         float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
 
         // Determine if the final lane was the correct choice based on the trial's shouldGoLeft value
-        int finalLane = (playerCar.position.x < 0) ? -1 : 1;
-        bool success = (finalLane == -1 && currentTrial.shouldGoLeft) || (finalLane == 1 && !currentTrial.shouldGoLeft);
+        bool success;
+        if (currentTrial.shouldGoLeft)
+        {
+            success = (finalLaneLabel == "Left");
+        }
+        else
+        {
+            success = (finalLaneLabel == "Right");
+        }
 
         // Determine AI action based on the message displayed to the player
         string aiAction = currentAiAction;
@@ -357,8 +376,10 @@ public class TrialManager : MonoBehaviour
             currentTrial.aiIsLying,
             aiAction,
             reactionRecorded,
+            carController.interventionCount,
             firstReactionTime,
-            laneLabel,
+            aiSuggestedlLaneLabel,
+            finalLaneLabel,
             success,
             currentDangerousObstacleName,
             currentSafeObstacleName
