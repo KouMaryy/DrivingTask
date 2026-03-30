@@ -236,10 +236,8 @@ public class TrialManager : MonoBehaviour
                                  (trials[currentTrialIndex].weatherIntensity <= 0.5f) ? "Low Fog" : "Heavy Fog";
 
             string finalLaneLabel = (playerCar.position.x < -2f) ? "Left" : "Right";
-            bool success = (trials[currentTrialIndex].shouldGoLeft && finalLaneLabel == "Left") ||
-                           (!trials[currentTrialIndex].shouldGoLeft && finalLaneLabel == "Right");
 
-            int pointsChanged = CalculateScore(trials[currentTrialIndex].aiIsLying, reactionRecorded, success, weatherLabel);
+            int pointsChanged = CalculateScore(trials[currentTrialIndex].aiIsLying, reactionRecorded, !hasCrashedThisTrial, weatherLabel);
 
             // Update Score in the UI 
             currentScore += pointsChanged;
@@ -374,16 +372,8 @@ public class TrialManager : MonoBehaviour
         // If the player intervened, calculate the reaction time, otherwise, it will be recorded as 0
         float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
 
-        // Determine if the final lane was the correct choice based on the trial's shouldGoLeft value
-        bool success;
-        if (currentTrial.shouldGoLeft)
-        {
-            success = (finalLaneLabel == "Left");
-        }
-        else
-        {
-            success = (finalLaneLabel == "Right");
-        }
+        // Determine if the final lane was the correct choice
+        bool success = !hasCrashedThisTrial;
 
         // Determine AI action based on the message displayed to the player
         string aiAction = currentAiAction;
@@ -391,7 +381,7 @@ public class TrialManager : MonoBehaviour
         // Save the trial data to the CSV file using the CSVManager
         CSVManager.SaveTrial(
             participantID,
-            currentTrialIndex,
+            currentTrialIndex+1, // +1 to make it 1-indexed for better readability in the CSV
             weatherLabel,
             currentTrial.aiIsLying,
             aiAction,
