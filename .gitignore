@@ -100,3 +100,7 @@ InitTestScene*.unity*
 .DS_Store
 *.csv
 *.csv.meta
+
+# Allow these specific configuration files
+!Assets/StreamingAssets/Group*.csv
+!Assets/StreamingAssets/warmup.csv

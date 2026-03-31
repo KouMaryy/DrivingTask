@@ -161,11 +161,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1189479083}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -50, y: -50}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 40, y: -40}
   m_SizeDelta: {x: 300, y: 100}
-  m_Pivot: {x: 1, y: 1}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &22706144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,8 +219,8 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 4
+  m_fontStyle: 1
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -299,47 +299,14 @@ MonoBehaviour:
   carRigidbody: {fileID: 1237220853}
   playerCar: {fileID: 1237220851}
   aiDisplay: {fileID: 752542068}
-  trials:
-  - aiMessage: TRIAL 1
-    shouldGoLeft: 0
-    aiIsLying: 0
-    weatherIntensity: 0
-  - aiMessage: 'TRIAL 2 '
-    shouldGoLeft: 1
-    aiIsLying: 0
-    weatherIntensity: 0.5
-  - aiMessage: 'TRIAL 3 '
-    shouldGoLeft: 0
-    aiIsLying: 0
-    weatherIntensity: 1
-  - aiMessage: TRIAL 4
-    shouldGoLeft: 1
-    aiIsLying: 0
-    weatherIntensity: 0.5
-  - aiMessage: 'TRIAL 5 '
-    shouldGoLeft: 1
-    aiIsLying: 0
-    weatherIntensity: 0
-  - aiMessage: TRIAL 6
-    shouldGoLeft: 1
-    aiIsLying: 1
-    weatherIntensity: 1
-  - aiMessage: TRIAL 7
-    shouldGoLeft: 0
-    aiIsLying: 1
-    weatherIntensity: 1
-  - aiMessage: 'TRIAL 8 '
-    shouldGoLeft: 1
-    aiIsLying: 1
-    weatherIntensity: 0
-  - aiMessage: 'TRIAL 9 '
-    shouldGoLeft: 1
-    aiIsLying: 1
-    weatherIntensity: 0.5
+  trials: []
   resetZ: 320
   downForce: 50000
   triggerZ: 260
   displayDistance: 150
+  currentScore: 1000
+  scoreDisplay: {fileID: 22706144}
+  trialCounter: {fileID: 0}
   weatherObject: {fileID: 632111266}
   dangerousPrefabs:
   - {fileID: 19871069}
@@ -350,7 +317,8 @@ MonoBehaviour:
   - {fileID: 999404910}
   - {fileID: 15937980}
   obstacleZ: 260
-  participantID: P02
+  participantID: P00
+  csvFileName: Warmup
 --- !u!4 &252712032
 Transform:
   m_ObjectHideFlags: 0
@@ -554,13 +522,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.06975647, y: 0, z: 0, w: 0.9975641}
-  m_LocalPosition: {x: -0.45, y: 1.55, z: -0.4}
+  m_LocalRotation: {x: 0.052333906, y: 0.008714599, z: -0.0004567122, w: 0.99859154}
+  m_LocalPosition: {x: -0.45, y: 1.5, z: -0.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4836469133205135384}
-  m_LocalEulerAnglesHint: {x: 8, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 6, y: 1, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5826,7 +5794,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0.3, y: 0.2}
+  m_SizeDelta: {x: 0.27, y: 0.17}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &752542068
 MonoBehaviour:
@@ -6119,7 +6087,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   canMove: 1
-  forwardSpeed: 31
+  forwardSpeed: 28
   laneDistance: 6
   sideSpeed: 10
   steeringWheel: {fileID: 2545001395375947676}

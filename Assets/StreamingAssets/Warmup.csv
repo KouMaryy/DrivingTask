@@ -1,0 +1,4 @@
+aiMessage,shouldGoLeft,aiIsLying,weatherIntensity
+SAFE,true,false,0.0
+SAFE,false,false,0.0
+SAFE,true,false,0.0
