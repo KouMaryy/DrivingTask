@@ -101,5 +101,6 @@ InitTestScene*.unity*
 *.csv
 *.csv.meta
 
-# But specifically ALLOW the trial configurations in StreamingAssets
+# Allow these specific configuration files
 !Assets/StreamingAssets/Group*.csv
+!Assets/StreamingAssets/warmup.csv

@@ -54,6 +54,7 @@ public class TrialManager : MonoBehaviour
 
     [Header("Data Logging")]
     public string participantID = "P01"; // Unique identifier for the participant, should be set from the Unity Inspector before each participant starts the experiment
+    public string csvFileName = "Group1"; // Name of the CSV file in StreamingAssets that contains the trial configurations
 
     // Data for CSV : Variables for reaction time measurement and player intervention tracking
     private float messageStartTime;
@@ -219,14 +220,14 @@ public class TrialManager : MonoBehaviour
             // shouldGoLeft is true, Left = fragile (Safe), Right = Solid (Danger)
             activeLeftObstacle = Instantiate(chosenSafe, leftPos, randomRotation);
             activeRightObstacle = Instantiate(chosenDangerous, rightPos, randomRotation);
-            Debug.Log($"Trial {currentTrialIndex}: Spawning SAFE({chosenSafe.name}) Left, DANGER({chosenDangerous.name}) Right");
+            Debug.Log($"Trial {currentTrialIndex + 1}: Spawning SAFE({chosenSafe.name}) Left, DANGER({chosenDangerous.name}) Right");
         }
         else
         {
             // shouldGoLeft is false, Left = solid (Danger), Right = Fragile (Safe)
             activeLeftObstacle = Instantiate(chosenDangerous, leftPos, randomRotation);
             activeRightObstacle = Instantiate(chosenSafe, rightPos, randomRotation);
-            Debug.Log($"Trial {currentTrialIndex}: Spawning DANGER({chosenDangerous.name}) Left, SAFE({chosenSafe.name}) Right");
+            Debug.Log($"Trial {currentTrialIndex + 1}: Spawning DANGER({chosenDangerous.name}) Left, SAFE({chosenSafe.name}) Right");
         }
     }
 
@@ -324,7 +325,7 @@ public class TrialManager : MonoBehaviour
                 if (intensity > 0)
                 {
                     // Activate the weather object and set the particle emission rate based on intensity
-                    Debug.Log("Trial " + currentTrialIndex + ": Weather starting now.");
+                    Debug.Log("Trial " + (currentTrialIndex + 1) + ": Weather starting now.");
                     weatherObject.SetActive(true);
                     if (!snowParticles.isPlaying) snowParticles.Play();
 
@@ -333,7 +334,7 @@ public class TrialManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Trial " + currentTrialIndex + ": Weather clearing now.");
+                    Debug.Log("Trial " + (currentTrialIndex + 1) + ": Weather clearing now.");
                     // Clear the weather object when intensity is 0
                     snowParticles.Stop();
                     snowParticles.Clear();
@@ -401,7 +402,7 @@ public class TrialManager : MonoBehaviour
             currentSafeObstacleName
         );
 
-        Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex}, Success: {success}, RT: {firstReactionTime:F2}s");
+        Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex + 1}, Success: {success}, RT: {firstReactionTime:F2}s");
     }
 
     private int CalculateScore(bool aiLied, bool userIntervened, bool success, string weatherLabel)
