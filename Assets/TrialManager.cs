@@ -32,7 +32,6 @@ public class TrialManager : MonoBehaviour
     private bool obstaclePassed = false; // flag to track if the car has passed the obstacle for the current trial
     private int currentTrialIndex = 0; // Index to keep track of the current trial
     private bool hasCrashedThisTrial = false;
-    public string csvFileName = "Group1"; // Name of the CSV file in StreamingAssets that contains the trial configurations
 
     [Header("Scoring System")]
     public int currentScore = 1000;
