@@ -100,3 +100,6 @@ InitTestScene*.unity*
 .DS_Store
 *.csv
 *.csv.meta
+
+# But specifically ALLOW the trial configurations in StreamingAssets
+!Assets/StreamingAssets/Group*.csv
