@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
 
 [System.Serializable]
 public class TrialData
@@ -31,6 +32,7 @@ public class TrialManager : MonoBehaviour
     private bool obstaclePassed = false; // flag to track if the car has passed the obstacle for the current trial
     private int currentTrialIndex = 0; // Index to keep track of the current trial
     private bool hasCrashedThisTrial = false;
+    public string csvFileName = "Group1"; // Name of the CSV file in StreamingAssets that contains the trial configurations
 
     [Header("Scoring System")]
     public int currentScore = 1000;
@@ -65,6 +67,9 @@ public class TrialManager : MonoBehaviour
 
     void Start()
     {
+        // Load the specific Latin Square group file
+        // You can change "Group1" in the inspector via a new string variable
+        LoadTrialsFromCSV(csvFileName);
         if (weatherObject != null)
         {
             // Get the component even if the object is inactive
@@ -382,7 +387,7 @@ public class TrialManager : MonoBehaviour
         // Save the trial data to the CSV file using the CSVManager
         CSVManager.SaveTrial(
             participantID,
-            currentTrialIndex+1, // +1 to make it 1-indexed for better readability in the CSV
+            currentTrialIndex + 1, // +1 to make it 1-indexed for better readability in the CSV
             weatherLabel,
             currentTrial.aiIsLying,
             aiAction,
@@ -448,5 +453,46 @@ public class TrialManager : MonoBehaviour
 
         // Disable this script to stop any further updates
         this.enabled = false;
+    }
+
+    public void LoadTrialsFromCSV(string fileName)
+    {
+        string filePath = Path.Combine(Application.streamingAssetsPath, fileName + ".csv");
+
+        if (File.Exists(filePath))
+        {
+            trials.Clear();
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Skip header row (i = 1)
+            for (int i = 1; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i])) continue;
+
+                string[] values = lines[i].Split(',');
+                TrialData newData = new TrialData();
+
+                // 1. aiMessage (Standard text)
+                newData.aiMessage = values[0].Trim();
+
+                // 2. shouldGoLeft (Convert to lowercase then parse)
+                string leftVal = values[1].Trim().ToLower();
+                newData.shouldGoLeft = (leftVal == "true");
+
+                // 3. aiIsLying (Convert to lowercase then parse)
+                string lieVal = values[2].Trim().ToLower();
+                newData.aiIsLying = (lieVal == "true");
+
+                // 4. weatherIntensity
+                newData.weatherIntensity = float.Parse(values[3].Trim());
+
+                trials.Add(newData);
+            }
+            Debug.Log($"Successfully loaded {trials.Count} trials from {fileName}");
+        }
+        else
+        {
+            Debug.LogError("Trial CSV file not found at: " + filePath);
+        }
     }
 }
