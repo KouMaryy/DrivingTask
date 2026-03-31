@@ -66,6 +66,21 @@ public class TrialManager : MonoBehaviour
 
     void Start()
     {
+        // 1. Path to your settings file
+        string settingsPath = Path.Combine(Application.streamingAssetsPath, "Settings.csv");
+
+        // 2. Read the file if it exists
+        if (File.Exists(settingsPath))
+        {
+            string[] lines = File.ReadAllLines(settingsPath);
+            if (lines.Length > 1) // Ensure there is a data row
+            {
+                string[] values = lines[1].Split(',');
+                participantID = values[0].Trim(); // Set P01, P02, etc.
+                csvFileName = values[1].Trim();    // Set Group1, Group2, etc.
+                Debug.Log($"External Settings Loaded: {participantID} using {csvFileName}");
+            }
+        }
         // Load the specific Latin Square group file
         // You can change "Group1" in the inspector via a new string variable
         LoadTrialsFromCSV(csvFileName);
