@@ -103,4 +103,5 @@ InitTestScene*.unity*
 
 # Allow these specific configuration files
 !Assets/StreamingAssets/Group*.csv
-!Assets/StreamingAssets/warmup.csv
+!Assets/StreamingAssets/Warmup.csv
+!Assets/StreamingAssets/Settings.csv
