@@ -52,8 +52,8 @@ public class TrialManager : MonoBehaviour
     private GameObject activeRightObstacle;
 
     [Header("Data Logging")]
-    public string participantID = "P01"; // Unique identifier for the participant, should be set from the Unity Inspector before each participant starts the experiment
-    public string csvFileName = "Group1"; // Name of the CSV file in StreamingAssets that contains the trial configurations
+    public string participantID = "P00"; // Unique identifier for the participant, should be set from the Unity Inspector before each participant starts the experiment
+    public string csvFileName = "Warmup"; // Name of the CSV file in StreamingAssets that contains the trial configurations
 
     // Data for CSV : Variables for reaction time measurement and player intervention tracking
     private float messageStartTime;
