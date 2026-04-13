@@ -16,6 +16,10 @@ public class TrialData
 
 public class TrialManager : MonoBehaviour
 {
+    [Header("AI Voice Settings")]
+    public AudioSource aiVoiceSource; // The "Voice Box"
+    public AudioClip switchLaneClip;  // The "Danger" audio
+  
     [Header("References")]
     public CarController carController;
     public Rigidbody carRigidbody;
@@ -187,6 +191,10 @@ public class TrialManager : MonoBehaviour
                 currentAiAction = "Switch";
                 aiDisplay.color = new Color(1f, 0.5f, 0f); // Change text color to orange for ΑΙ activeintervention
                 carController.SetTargetLane(suggestedLane);
+
+                // --- ADD THIS LINE ---
+                if (aiVoiceSource != null && switchLaneClip != null)
+                aiVoiceSource.PlayOneShot(switchLaneClip);
                 Debug.Log("AI Intervention: Switching to Lane " + suggestedLane);
             }
 
