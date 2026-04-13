@@ -6087,7 +6087,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarController
   canMove: 1
-  forwardSpeed: 35
+  forwardSpeed: 36
   laneDistance: 6
   sideSpeed: 10
   steeringWheel: {fileID: 2545001395375947676}
