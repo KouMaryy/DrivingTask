@@ -3,8 +3,7 @@ using System.IO;
 
 public static class CSVManager
 {
-    public static void SaveTrial(string fileName, int id, string weather, bool lying, string action, bool intervened, int numInterventions, float reactionTime, float aiTime, float playerTime, string aiSuggestedlLaneLabel, string finalLane, bool success, int currentScore, string dangerousObstacle, string safeObstacle)
-    {
+public static void SaveTrial(string fileName, int id, string weather, bool lying, string action, bool intervened, int numInterventions, float reactionTime, float aiTime, float playerTime, string aiSuggestedlLaneLabel, string finalLane, bool success, int currentScore, string dangerousObstacle, string safeObstacle)    {
         string fullFileName = fileName + ".csv";
         string filePath = Path.Combine(Application.dataPath, fullFileName);
 
@@ -22,24 +21,7 @@ public static class CSVManager
         // and :F3 to force 3 decimal places (even for leading zeros)
         string row = string.Format(System.Globalization.CultureInfo.InvariantCulture,
         "{0},{1},{2},{3},{4},{5},{6:F3},{7:F3},{8:F3},{9},{10},{11},{12},{13},{14},{15}{16}",
-            id, 
-            weather, 
-            lying, 
-            action, 
-            intervened, 
-            numInterventions, 
-            reactionTime,    // Now forced to 0.xxx
-            aiTime,          // Now forced to x.xxx
-            playerTime,      // Now forced to x.xxx
-            aiSuggestedlLaneLabel, 
-            finalLane, 
-            success, 
-            currentScore, 
-            dangerousObstacle, 
-            safeObstacle, 
-            timestamp, 
-            System.Environment.NewLine
-        );          
+        id, weather, lying, action, intervened, numInterventions, reactionTime, aiTime, playerTime, aiSuggestedlLaneLabel, finalLane, success, currentScore, dangerousObstacle, safeObstacle, timestamp, System.Environment.NewLine);         
         File.AppendAllText(filePath, row);
     }
 }

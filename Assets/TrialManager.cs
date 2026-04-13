@@ -404,23 +404,23 @@ public class TrialManager : MonoBehaviour
 
         // Save the trial data to the CSV file using the CSVManager
         CSVManager.SaveTrial(
-            participantID,
-            currentTrialIndex + 1, // +1 to make it 1-indexed for better readability in the CSV
-            weatherLabel,
-            currentTrial.aiIsLying,
-            currentAiAction,
-            reactionRecorded,
-            carController.interventionCount,
-            reactionT,
-            messageStartTime,    // Raw Start Time
-            firstInterventionTime, // Raw End Time
-            aiSuggestedlLaneLabel,
-            finalLaneLabel,
-            success,
-            currentScore,
-            currentDangerousObstacleName,
-            currentSafeObstacleName
-        );
+            participantID,                 // 1
+            currentTrialIndex + 1,         // 2
+            weatherLabel,                  // 3
+            currentTrial.aiIsLying,        // 4
+            currentAiAction,               // 5
+            reactionRecorded,              // 6
+            carController.interventionCount, // 7
+            reactionT,                     // 8
+            messageStartTime,              // 9
+            firstInterventionTime,         // 10
+            aiSuggestedlLaneLabel,         // 11
+            finalLaneLabel,                // 12
+            success,                       // 13
+            currentScore,                  // 14
+            currentDangerousObstacleName,  // 15
+            currentSafeObstacleName        // 16
+);
 
         Debug.Log($"<color=green>Data Logged:</color> AI Time: {messageStartTime:F3}, Player Time: {firstInterventionTime:F3}");
     }
