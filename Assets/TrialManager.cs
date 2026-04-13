@@ -122,22 +122,26 @@ public class TrialManager : MonoBehaviour
             ShowAiMessage();
         }
 
-        //Reaction Recording: If the AI has displayed a message and the player has intervened for the first time
-        if (messageDisplayed && !obstaclePassed && !reactionRecorded && carController.didPlayerIntervene)
-        {
-            if (Time.time >= messageStartTime) // extra safety check to avoid the "Same Frame" Problem
-            {
-                firstInterventionTime = Time.time;
-                reactionRecorded = true;
-                Debug.Log("Reaction Recorded: " + (firstInterventionTime - messageStartTime) + "s");
-            }
-        }
-
         if (!obstaclePassed && playerCar.position.z >= triggerZ)
         {
             ShowPostObstacleMessage();
         }
     }
+
+    public void RecordPlayerAction()
+    {
+        // We only record the first intervention that happens AFTER the AI message
+        if (messageDisplayed && !obstaclePassed && !reactionRecorded)
+        {
+            firstInterventionTime = Time.time;
+            reactionRecorded = true;
+        
+            // This is your true Reaction Time
+            float reactionTime = firstInterventionTime - messageStartTime;
+            Debug.Log($"<color=cyan>Valid Reaction Recorded: {reactionTime:F3}s</color>");
+    }
+    }
+    
 
     void ShowAiMessage()
     {
@@ -389,8 +393,8 @@ public class TrialManager : MonoBehaviour
         // Translate Lane Number to Labels : Left is -1, Right is 1
         string finalLaneLabel = (playerCar.position.x < -2f) ? "Left" : "Right";
 
-        // If the player intervened, calculate the reaction time, otherwise, it will be recorded as 0
-        float firstReactionTime = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
+         // If the player intervened, calculate the reaction time, otherwise, it will be recorded as 0
+        float reactionT = reactionRecorded ? (firstInterventionTime - messageStartTime) : 0f;
 
         // Determine if the final lane was the correct choice
         bool success = !hasCrashedThisTrial;
@@ -404,10 +408,12 @@ public class TrialManager : MonoBehaviour
             currentTrialIndex + 1, // +1 to make it 1-indexed for better readability in the CSV
             weatherLabel,
             currentTrial.aiIsLying,
-            aiAction,
+            currentAiAction,
             reactionRecorded,
             carController.interventionCount,
-            firstReactionTime,
+            reactionT,
+            messageStartTime,    // Raw Start Time
+            firstInterventionTime, // Raw End Time
             aiSuggestedlLaneLabel,
             finalLaneLabel,
             success,
@@ -416,7 +422,7 @@ public class TrialManager : MonoBehaviour
             currentSafeObstacleName
         );
 
-        Debug.Log($"<color=green>Data Logged:</color> Trial {currentTrialIndex + 1}, Success: {success}, RT: {firstReactionTime:F2}s");
+        Debug.Log($"<color=green>Data Logged:</color> AI Time: {messageStartTime:F3}, Player Time: {firstInterventionTime:F3}");
     }
 
     private int CalculateScore(bool aiLied, bool userIntervened, bool success, string weatherLabel)

@@ -38,7 +38,9 @@ public class CarController : MonoBehaviour
 
             if (manager != null && manager.IsAIPresentlyActive())
             {
-                 // Increase the total count for the CSV
+                manager.RecordPlayerAction();
+
+                // Increase the total count for the CSV
                 interventionCount++;
                 didPlayerIntervene = true;
 
